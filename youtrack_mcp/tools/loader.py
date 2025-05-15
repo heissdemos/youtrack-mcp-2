@@ -25,13 +25,15 @@ def load_all_tools() -> Dict[str, Callable]:
     from youtrack_mcp.tools.projects import ProjectTools
     from youtrack_mcp.tools.users import UserTools
     from youtrack_mcp.tools.search import SearchTools
+    from youtrack_mcp.tools.work_items import WorkItemTools
     
     # Initialize tool classes
     tool_classes = [
         IssueTools(),
         ProjectTools(),
         UserTools(),
-        SearchTools()
+        SearchTools(),
+        WorkItemTools()
     ]
     
     # Collect tools from each class

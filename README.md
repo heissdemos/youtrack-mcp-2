@@ -27,6 +27,12 @@ Model Context Protocol (MCP) is an open standard that enables AI models to inter
   - Search for users
   - Access user details and groups
 
+- **Time Tracking**
+  - Record work time on issues
+  - Retrieve time tracking entries
+  - Update and delete time records
+  - Support for time in various formats (e.g., "2h 30m")
+
 - **Search Functionality**
   - Advanced search with custom fields
   - Structured filtering
@@ -151,6 +157,14 @@ The YouTrack MCP server provides the following tools:
 - `get_user_by_login` - Find a user by login name
 - `get_user_groups` - Get groups for a user
 
+### Time Tracking
+
+- `get_work_items` - Get work items (time tracking entries) for a specific issue
+- `create_work_item` - Create a new work item for an issue (record time spent)
+- `update_work_item` - Update an existing work item
+- `delete_work_item` - Delete a work item
+- `get_work_item` - Get details of a specific work item
+
 ### Search
 
 - `advanced_search` - Advanced search with sorting options
@@ -183,6 +197,18 @@ Create a new bug report in the PROJECT with the summary "Login page is not worki
 
 ```
 Add a comment to issue PROJECT-456 saying "I've fixed this issue in the latest commit. Please review."
+```
+
+### Record Work Time
+
+```
+Record 2 hours and 30 minutes of work time on issue PROJECT-123 with the description "Implemented the login feature"
+```
+
+### Get Time Tracking Entries
+
+```
+Show me all the time entries for issue PROJECT-123 from this week
 ```
 
 ## Configuration

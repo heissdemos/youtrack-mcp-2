@@ -6,6 +6,18 @@
 .cursorrules
 .cursor/
 
+# MCP Configuration files with sensitive data
+.claude-mcp.json
+.vscode/mcp.json
+.cursor/mcp.json
+.config/claude/*.json
+
+# Claude specific files that might contain tokens
+CLAUDE.md
+~/.claude/CLAUDE.md
+~/.config/claude/CLAUDE.md
+/home/pia/.claude/CLAUDE.md
+
 # Python
 __pycache__/
 *.py[cod]
@@ -34,6 +46,7 @@ venv/
 venv_test/
 ENV/
 env/
+mcp-venv/
 
 # IDE files
 .idea/
@@ -58,4 +71,17 @@ plan.md
 IMPLEMENTATION_STATUS.md
 todo.md
 integration_tests/
-.python-version 
+.python-version
+
+# Docker-related sensitive files
+docker-compose.override.yml
+docker.env
+
+# Custom token and security files
+*.pem
+*.key
+*.token
+tokens/
+auth/
+credentials/
+secrets/

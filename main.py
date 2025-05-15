@@ -20,6 +20,7 @@ from youtrack_mcp.tools.issues import IssueTools
 from youtrack_mcp.tools.projects import ProjectTools
 from youtrack_mcp.tools.users import UserTools
 from youtrack_mcp.tools.search import SearchTools
+from youtrack_mcp.tools.work_items import WorkItemTools
 from youtrack_mcp.tools.loader import load_all_tools
 
 # Set up logging
@@ -253,12 +254,14 @@ def main():
         project_tools = ProjectTools()
         user_tools = UserTools()
         search_tools = SearchTools()
+        work_item_tools = WorkItemTools()
         
         # Register tools
         server.register_tools(issue_tools.get_tool_definitions())
         server.register_tools(project_tools.get_tool_definitions())
         server.register_tools(user_tools.get_tool_definitions())
         server.register_tools(search_tools.get_tool_definitions())
+        server.register_tools(work_item_tools.get_tool_definitions())
         
         # Start server with uvicorn
         import uvicorn
@@ -277,6 +280,8 @@ def main():
             user_tools.close()
         if 'search_tools' in locals():
             search_tools.close()
+        if 'work_item_tools' in locals():
+            work_item_tools.close()
 
 
 if __name__ == "__main__":

@@ -3,6 +3,7 @@ from youtrack_mcp.tools.issues import IssueTools
 from youtrack_mcp.tools.projects import ProjectTools
 from youtrack_mcp.tools.users import UserTools
 from youtrack_mcp.tools.search import SearchTools
+from youtrack_mcp.tools.work_items import WorkItemTools
 
 class MCPServer:
     """YouTrack MCP Server."""
@@ -14,6 +15,7 @@ class MCPServer:
         self.project_tools = ProjectTools()
         self.user_tools = UserTools()
         self.search_tools = SearchTools()
+        self.work_item_tools = WorkItemTools()
 
     def register_tools(self) -> None:
         """Register all MCP tools."""
@@ -66,6 +68,16 @@ class MCPServer:
                 function=tool_config["function"],
                 parameter_descriptions=tool_config.get("parameter_descriptions", {}),
             )
+            
+        # Register work item tools
+        work_item_tool_definitions = self.work_item_tools.get_tool_definitions()
+        for tool_name, tool_config in work_item_tool_definitions.items():
+            self.register_tool(
+                name=tool_name,
+                description=tool_config["description"],
+                function=tool_config["function"],
+                parameter_descriptions=tool_config.get("parameter_descriptions", {}),
+            )
 
     def close(self) -> None:
         """Close the MCP server."""
@@ -74,5 +86,6 @@ class MCPServer:
         self.project_tools.close()
         self.user_tools.close()
         self.search_tools.close()
+        self.work_item_tools.close()
 
  
