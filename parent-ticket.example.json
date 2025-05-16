@@ -1,0 +1,6 @@
+{
+  "tickets": [
+    
+  ],
+  "_comment": "This is an example parent-ticket.json file. To use it, rename to parent-ticket.json and place in your working directory. If no parent-ticket.json file is found, all tickets will be allowed."
+}

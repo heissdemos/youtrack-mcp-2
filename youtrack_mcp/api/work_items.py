@@ -57,13 +57,20 @@ class WorkItemsClient:
     def is_parent_ticket_allowed(self, issue_id: str) -> bool:
         """
         Check if the given issue ID is in the list of allowed parent tickets.
+        If ALLOWED_PARENT_TICKETS is None, all tickets are allowed.
         
         Args:
             issue_id: The issue ID to check
             
         Returns:
-            True if the issue ID is in the allowed list, False otherwise
+            True if the issue ID is in the allowed list or if all tickets are allowed,
+            False otherwise
         """
+        # If ALLOWED_PARENT_TICKETS is None, all tickets are allowed
+        if ALLOWED_PARENT_TICKETS is None:
+            return True
+        
+        # Otherwise, check if the issue ID is in the allowed list
         return issue_id in ALLOWED_PARENT_TICKETS
         
     def is_ticket_resolved(self, issue_id: str) -> Tuple[bool, Optional[str]]:
@@ -146,8 +153,13 @@ class WorkItemsClient:
         """
         # Check if the issue ID is in the allowed list
         if not self.is_parent_ticket_allowed(issue_id):
-            allowed_tickets = ", ".join(ALLOWED_PARENT_TICKETS)
-            raise ValueError(f"Issue ID '{issue_id}' is not in the list of allowed parent tickets. Allowed tickets: {allowed_tickets}")
+            # If ALLOWED_PARENT_TICKETS is not None, show the list of allowed tickets
+            if ALLOWED_PARENT_TICKETS is not None:
+                allowed_tickets = ", ".join(ALLOWED_PARENT_TICKETS)
+                raise ValueError(f"Issue ID '{issue_id}' is not in the list of allowed parent tickets. Allowed tickets: {allowed_tickets}")
+            else:
+                # This should never happen, but just in case
+                raise ValueError(f"Issue ID '{issue_id}' is not allowed, but no restrictions are defined. This is unexpected.")
         
         # Check if the ticket is resolved (closed)
         is_resolved, message = self.is_ticket_resolved(issue_id)

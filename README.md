@@ -166,8 +166,24 @@ The YouTrack MCP server provides the following tools:
 - `get_work_item` - Get details of a specific work item
 
 Time tracking is protected by two validation mechanisms:
-1. **Allowed Tickets**: Only tickets in the approved list (ALLOWED_PARENT_TICKETS) can receive time entries
+1. **Allowed Tickets**: Only tickets in the allowed list can receive time entries (configurable via parent-ticket.json)
 2. **Closed Ticket Protection**: Time cannot be booked on resolved/closed tickets
+
+#### Time Tracking Validation
+You can control which parent tickets are allowed for time tracking by using a local configuration file:
+
+- Create a `parent-ticket.json` file in your working directory with the list of allowed tickets:
+  ```json
+  {
+    "tickets": [
+      "PROJECT-123",
+      "PROJECT-456",
+      "ANOTHER-789"
+    ]
+  }
+  ```
+- If no `parent-ticket.json` file is found, all parent tickets will be allowed (no restrictions)
+- See the provided `parent-ticket.example.json` file for a template
 
 ### Search
 
@@ -210,7 +226,7 @@ Record 2 hours and 30 minutes of work time on issue PROJECT-123 with the descrip
 ```
 
 Note: Work time can only be recorded on:
-1. Tickets in the approved list (configured in ALLOWED_PARENT_TICKETS)
+1. Tickets in the approved list (configured via parent-ticket.json, or all tickets if no file exists)
 2. Tickets that are not in a resolved/closed state
 
 ### Get Time Tracking Entries
@@ -231,7 +247,6 @@ The server can be configured via environment variables:
 | `MCP_SERVER_NAME` | Name of the MCP server | `youtrack-mcp` |
 | `MCP_SERVER_DESCRIPTION` | Description of the MCP server | `YouTrack MCP Server` |
 | `MCP_DEBUG` | Enable debug logging | `false` |
-| `ALLOWED_PARENT_TICKETS` | List of ticket IDs allowed for time tracking | (configured in allowed_tickets.py) |
 
 ### SSL Certificate Verification
 
