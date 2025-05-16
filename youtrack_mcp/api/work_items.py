@@ -1,11 +1,12 @@
 """
 YouTrack Work Items API client.
 """
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 from pydantic import BaseModel, Field
 
 from youtrack_mcp.api.client import YouTrackClient
+from youtrack_mcp.allowed_tickets import ALLOWED_PARENT_TICKETS
 
 
 class WorkItem(BaseModel):
@@ -53,6 +54,73 @@ class WorkItemsClient:
         response = self.client.get(f"issues/{issue_id}/timeTracking/workItems")
         return response
     
+    def is_parent_ticket_allowed(self, issue_id: str) -> bool:
+        """
+        Check if the given issue ID is in the list of allowed parent tickets.
+        
+        Args:
+            issue_id: The issue ID to check
+            
+        Returns:
+            True if the issue ID is in the allowed list, False otherwise
+        """
+        return issue_id in ALLOWED_PARENT_TICKETS
+        
+    def is_ticket_resolved(self, issue_id: str) -> Tuple[bool, Optional[str]]:
+        """
+        Check if the ticket is resolved (closed) in YouTrack.
+        
+        Examines the ticket's state fields to determine if all of them are marked as resolved.
+        If any state field is not resolved, the ticket is considered open.
+        
+        Args:
+            issue_id: The issue ID or readable ID (e.g., PROJECT-123)
+            
+        Returns:
+            A tuple containing:
+            - A boolean indicating if the ticket is resolved (True) or not (False)
+            - An optional string message with details (state name or error message)
+        """
+        try:
+            # Fetch the issue details from the API with fields that include state information
+            fields = "$type,id,summary,customFields($type,id,name,value($type,id,name,isResolved))"
+            response = self.client.get(f"issues/{issue_id}?fields={fields}")
+            
+            # Check if the response contains the necessary fields
+            if "customFields" not in response:
+                return False, "Could not fetch state fields for the issue"
+                
+            # Look for state-type fields and check if all are resolved
+            state_fields = [field for field in response["customFields"] 
+                           if field.get("$type", "").endswith("StateIssueCustomField")]
+            
+            # If no state fields found, assume the ticket is open
+            if not state_fields:
+                return False, "No state fields found for the issue"
+                
+            # Check each state field for resolution status
+            for field in state_fields:
+                if "value" in field and field["value"] is not None:
+                    value = field["value"]
+                    is_resolved = value.get("isResolved", False)
+                    field_name = field.get("name", "State")
+                    state_name = value.get("name", "Unknown")
+                    
+                    # If any state field is not resolved, the ticket is considered open
+                    if not is_resolved:
+                        return False, f"Issue has state '{state_name}' in field '{field_name}' which is not resolved"
+                else:
+                    # If a state field has no value, consider it not resolved
+                    field_name = field.get("name", "State")
+                    return False, f"Issue has no value for state field '{field_name}'"
+            
+            # If we reach here, all state fields are resolved
+            return True, "All state fields are resolved"
+            
+        except Exception as e:
+            # In case of error, assume the ticket is open
+            return False, f"Error checking ticket status: {str(e)}"
+    
     def create_work_item(self, 
                          issue_id: str, 
                          duration: str,
@@ -71,7 +139,21 @@ class WorkItemsClient:
             
         Returns:
             The created work item data
+            
+        Raises:
+            ValueError: If the issue ID is not in the list of allowed parent tickets
+            ValueError: If the issue is resolved/closed and time tracking is not allowed
         """
+        # Check if the issue ID is in the allowed list
+        if not self.is_parent_ticket_allowed(issue_id):
+            allowed_tickets = ", ".join(ALLOWED_PARENT_TICKETS)
+            raise ValueError(f"Issue ID '{issue_id}' is not in the list of allowed parent tickets. Allowed tickets: {allowed_tickets}")
+        
+        # Check if the ticket is resolved (closed)
+        is_resolved, message = self.is_ticket_resolved(issue_id)
+        if is_resolved:
+            raise ValueError(f"Cannot add work items to resolved ticket '{issue_id}'. Status: {message}")
+        
         data = {
             "duration": {
                 "presentation": duration

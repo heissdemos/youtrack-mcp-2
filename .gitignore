@@ -85,3 +85,6 @@ tokens/
 auth/
 credentials/
 secrets/
+
+# Ticket list for time tracking permissions
+youtrack_mcp/allowed_tickets.py

@@ -5,6 +5,8 @@ import os
 import ssl
 from typing import Optional, Dict, Any
 
+from youtrack_mcp.allowed_tickets import ALLOWED_PARENT_TICKETS
+
 # Optional import for dotenv
 try:
     from dotenv import load_dotenv
@@ -34,6 +36,9 @@ class Config:
     MCP_SERVER_NAME: str = os.getenv("MCP_SERVER_NAME", "youtrack-mcp")
     MCP_SERVER_DESCRIPTION: str = os.getenv("MCP_SERVER_DESCRIPTION", "YouTrack MCP Server")
     MCP_DEBUG: bool = os.getenv("MCP_DEBUG", "false").lower() in ("true", "1", "yes")
+    
+    # Reference to allowed parent tickets from allowed_tickets.py
+    ALLOWED_PARENT_TICKETS: list = ALLOWED_PARENT_TICKETS
     
     @classmethod
     def from_dict(cls, config_dict: Dict[str, Any]) -> None:

@@ -52,6 +52,7 @@ class WorkItemTools:
             JSON string with the created work item information
         """
         try:
+            # Validation occurs inside the API client method
             result = self.work_items_api.create_work_item(
                 issue_id=issue_id,
                 duration=duration,
@@ -60,7 +61,12 @@ class WorkItemTools:
                 date=date
             )
             return json.dumps(result, indent=2)
+        except ValueError as e:
+            # Specific handling for validation errors (not allowed parent ticket)
+            logger.warning(f"Validation error creating work item for issue {issue_id}: {str(e)}")
+            return json.dumps({"error": str(e), "type": "validation_error"})
         except Exception as e:
+            # General error handling
             logger.exception(f"Error creating work item for issue {issue_id}")
             return json.dumps({"error": str(e)})
     

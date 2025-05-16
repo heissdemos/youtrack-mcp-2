@@ -165,6 +165,10 @@ The YouTrack MCP server provides the following tools:
 - `delete_work_item` - Delete a work item
 - `get_work_item` - Get details of a specific work item
 
+Time tracking is protected by two validation mechanisms:
+1. **Allowed Tickets**: Only tickets in the approved list (ALLOWED_PARENT_TICKETS) can receive time entries
+2. **Closed Ticket Protection**: Time cannot be booked on resolved/closed tickets
+
 ### Search
 
 - `advanced_search` - Advanced search with sorting options
@@ -205,6 +209,10 @@ Add a comment to issue PROJECT-456 saying "I've fixed this issue in the latest c
 Record 2 hours and 30 minutes of work time on issue PROJECT-123 with the description "Implemented the login feature"
 ```
 
+Note: Work time can only be recorded on:
+1. Tickets in the approved list (configured in ALLOWED_PARENT_TICKETS)
+2. Tickets that are not in a resolved/closed state
+
 ### Get Time Tracking Entries
 
 ```
@@ -223,6 +231,7 @@ The server can be configured via environment variables:
 | `MCP_SERVER_NAME` | Name of the MCP server | `youtrack-mcp` |
 | `MCP_SERVER_DESCRIPTION` | Description of the MCP server | `YouTrack MCP Server` |
 | `MCP_DEBUG` | Enable debug logging | `false` |
+| `ALLOWED_PARENT_TICKETS` | List of ticket IDs allowed for time tracking | (configured in allowed_tickets.py) |
 
 ### SSL Certificate Verification
 
