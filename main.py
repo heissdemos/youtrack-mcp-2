@@ -169,7 +169,7 @@ async def list_tools():
 def parse_args():
     """Parse command line arguments."""
     parser = argparse.ArgumentParser(description="YouTrack MCP Server")
-    parser.add_argument("--host", default="0.0.0.0", help="Host to bind the server to")
+    parser.add_argument("--host", default="127.0.0.1", help="Host to bind the server to")
     parser.add_argument("--port", type=int, default=8000, help="Port to bind the server to")
     parser.add_argument(
         "--log-level", 

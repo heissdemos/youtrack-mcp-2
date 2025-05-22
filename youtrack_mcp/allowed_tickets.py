@@ -40,5 +40,5 @@ def load_allowed_parent_tickets():
         return None
 
 # Load parent tickets from file or use None (all tickets allowed)
-ALLOWED_PARENT_TICKETS = load_allowed_parent_tickets()
 
+ALLOWED_PARENT_TICKETS = load_allowed_parent_tickets()
