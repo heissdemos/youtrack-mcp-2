@@ -1,12 +1,12 @@
-# YouTrack MCP Server
+# YouTrack MCP Server (FastMCP 2.0)
 
-A Model Context Protocol (MCP) server implementation for JetBrains YouTrack, allowing AI assistants to interact with YouTrack issue tracking system.
+A modern Model Context Protocol (MCP) server implementation for JetBrains YouTrack, built with FastMCP 2.0. This server allows AI assistants to interact with YouTrack issue tracking systems through a clean, decorator-based architecture.
 
 ![Screenshot](screenshot/CleanShot%202025-04-14%20at%2023.24.21@2x.png)
 
 ## What is MCP?
 
-Model Context Protocol (MCP) is an open standard that enables AI models to interact with external tools and services through a unified interface. This project provides an MCP server that exposes YouTrack functionality to AI assistants that support the MCP standard, such as Claude in VS Code and GitHub Copilot in agent mode.
+Model Context Protocol (MCP) is an open standard that enables AI models to interact with external tools and services through a unified interface. This project provides an MCP server that exposes YouTrack functionality to AI assistants that support the MCP standard, such as Claude.
 
 ## Features
 
@@ -20,12 +20,11 @@ Model Context Protocol (MCP) is an open standard that enables AI models to inter
   - Get project list and details
   - Create and update projects
   - Access project issues
-  - Manage custom fields
 
 - **User Management**
   - Get current user information
   - Search for users
-  - Access user details and groups
+  - Access user details
 
 - **Time Tracking**
   - Record work time on issues
@@ -40,100 +39,68 @@ Model Context Protocol (MCP) is an open standard that enables AI models to inter
 
 ## Installation & Usage
 
-The recommended way to run the YouTrack MCP server is using Docker:
+### Using Docker (Recommended)
 
-1. Clone the repository:
-   ```
-   git clone https://github.com/tonyzorin/youtrack-mcp.git
-   cd youtrack-mcp
-   ```
-
-2. Build the Docker image:
-   ```
-   docker build -t youtrack-mcp .
+1. Pull the Docker image:
+   ```bash
+   docker pull youtrack-mcp-fastmcp:latest
    ```
 
-3. Run the container with your YouTrack credentials:
-   ```
+2. Run the container with your YouTrack credentials:
+   ```bash
    docker run -i --rm \
      -e YOUTRACK_URL=https://your-instance.youtrack.cloud \
      -e YOUTRACK_API_TOKEN=your-api-token \
-     youtrack-mcp
+     youtrack-mcp-fastmcp:latest
    ```
 
    Note: The `-i` flag is important as it keeps STDIN open, which is required for the MCP stdio transport.
 
-### Security Considerations
+### Building from Source
 
-⚠️ **API Token Security**
-
-- Treat your mcp.json file as .env
-- Rotate your YouTrack API tokens periodically
-- Use tokens with the minimum required permissions for your use case
-
-
-## Using with Cursor
-
-To use your YouTrack MCP server with Cursor:
-
-1. Make sure you have the Docker image built:
-   ```
-   docker build -t youtrack-mcp .
+1. Clone the repository:
+   ```bash
+   git clone <this-repo>
+   cd youtrack-mcp-2
    ```
 
-2. Create a `.cursor/mcp.json` file with the following content:
-
-    ```json
-    {
-        "mcpServers": {
-            "YouTrack": {
-                "type": "stdio",
-                "command": "docker",
-                "args": ["run", "-i", "--rm", 
-                "-e", "YOUTRACK_URL=https://yourinstance.youtrack.cloud",
-                "-e", "YOUTRACK_API_TOKEN=perm:your-token",
-                "youtrack-mcp"
-                ]
-            }
-        }
-    }
-    ```
-Replace `yourinstance.youtrack.cloud` with your actual YouTrack instance URL and `perm:your-token` with your actual API token.
-
-
-
-## Using with VS Code
-
-To use the YouTrack MCP server with VS Code:
-
-1. Make sure you have the Docker image built:
-   ```
-   docker build -t youtrack-mcp .
+2. Build the Docker image:
+   ```bash
+   docker build -t youtrack-mcp-fastmcp:latest .
    ```
 
-2. Create a `.vscode/mcp.json` file with the following content:
+## Using with Claude
 
-   ```json
-   {
-     "servers": {
-       "YouTrack": {
-         "type": "stdio",
-         "command": "docker",
-         "args": ["run", "-i", "--rm", 
-           "-e", "YOUTRACK_URL=https://yourinstance.youtrack.cloud",
-           "-e", "YOUTRACK_API_TOKEN=perm:your-token",
-           "youtrack-mcp"
-         ]
-       }
-     }
-   }
-   ```
+To connect this MCP server with Claude, use the `claude mcp add` command:
 
-   Replace `yourinstance.youtrack.cloud` with your actual YouTrack instance URL and `perm:your-token` with your actual API token.
+```bash
+claude mcp add \
+  -e YOUTRACK_URL=https://your-instance.youtrack.cloud \
+  -e YOUTRACK_API_TOKEN=your-api-token \
+  youtrack-fastmcp \
+  docker run --rm -i youtrack-mcp-fastmcp:latest
+```
+
+Alternatively, create a wrapper script and add it:
+
+```bash
+# Create wrapper script
+cat > youtrack-mcp-wrapper.sh << 'EOF'
+#!/bin/bash
+docker run --rm -i \
+  -e YOUTRACK_URL=https://your-instance.youtrack.cloud \
+  -e YOUTRACK_API_TOKEN=your-api-token \
+  youtrack-mcp-fastmcp:latest
+EOF
+chmod +x youtrack-mcp-wrapper.sh
+
+# Add to Claude
+claude mcp add youtrack-fastmcp ./youtrack-mcp-wrapper.sh
+```
 
 ## Available Tools
 
-The YouTrack MCP server provides the following tools:
+The YouTrack MCP server provides the following tools via FastMCP decorators:
 
 ### Issues
 
@@ -154,8 +121,6 @@ The YouTrack MCP server provides the following tools:
 - `get_current_user` - Get information about the currently authenticated user
 - `get_user` - Get information about a specific user
 - `search_users` - Search for users
-- `get_user_by_login` - Find a user by login name
-- `get_user_groups` - Get groups for a user
 
 ### Time Tracking
 
@@ -163,27 +128,10 @@ The YouTrack MCP server provides the following tools:
 - `create_work_item` - Create a new work item for an issue (record time spent)
 - `update_work_item` - Update an existing work item
 - `delete_work_item` - Delete a work item
-- `get_work_item` - Get details of a specific work item
 
-Time tracking is protected by two validation mechanisms:
+Time tracking is protected by validation mechanisms:
 1. **Allowed Tickets**: Only tickets in the allowed list can receive time entries (configurable via parent-ticket.json)
 2. **Closed Ticket Protection**: Time cannot be booked on resolved/closed tickets
-
-#### Time Tracking Validation
-You can control which parent tickets are allowed for time tracking by using a local configuration file:
-
-- Create a `parent-ticket.json` file in your working directory with the list of allowed tickets:
-  ```json
-  {
-    "tickets": [
-      "PROJECT-123",
-      "PROJECT-456",
-      "ANOTHER-789"
-    ]
-  }
-  ```
-- If no `parent-ticket.json` file is found, all parent tickets will be allowed (no restrictions)
-- See the provided `parent-ticket.example.json` file for a template
 
 ### Search
 
@@ -196,43 +144,23 @@ You can control which parent tickets are allowed for time tracking by using a lo
 Here are some examples of using the YouTrack MCP server with AI assistants:
 
 ### Get Issue
-
 ```
 Can you get the details for issue DEMO-1?
 ```
 
 ### Search for Issues
-
 ```
 Find all open issues assigned to me that are high priority
 ```
 
 ### Create a New Issue
-
 ```
 Create a new bug report in the PROJECT with the summary "Login page is not working" and description "Users are unable to log in after the recent update."
 ```
 
-### Add a Comment
-
-```
-Add a comment to issue PROJECT-456 saying "I've fixed this issue in the latest commit. Please review."
-```
-
 ### Record Work Time
-
 ```
 Record 2 hours and 30 minutes of work time on issue PROJECT-123 with the description "Implemented the login feature"
-```
-
-Note: Work time can only be recorded on:
-1. Tickets in the approved list (configured via parent-ticket.json, or all tickets if no file exists)
-2. Tickets that are not in a resolved/closed state
-
-### Get Time Tracking Entries
-
-```
-Show me all the time entries for issue PROJECT-123 from this week
 ```
 
 ## Configuration
@@ -248,28 +176,26 @@ The server can be configured via environment variables:
 | `MCP_SERVER_DESCRIPTION` | Description of the MCP server | `YouTrack MCP Server` |
 | `MCP_DEBUG` | Enable debug logging | `false` |
 
-### SSL Certificate Verification
+## Architecture
 
-For self-hosted instances with self-signed SSL certificates, you can disable SSL verification:
+This implementation uses **FastMCP 2.0** which provides:
 
-```bash
-docker run -i --rm \
-  -e YOUTRACK_URL=https://youtrack.internal.company.com \
-  -e YOUTRACK_API_TOKEN=perm:your-permanent-token \
-  -e YOUTRACK_VERIFY_SSL=false \
-  youtrack-mcp
-```
+- **Decorator-based tool definitions** - Clean, Pythonic code
+- **Automatic schema generation** - From type hints and docstrings
+- **Simplified architecture** - Single server instead of dual FastAPI/MCP setup
+- **Modern MCP features** - Built on the latest MCP protocol standards
 
-This option is only recommended for development or in controlled environments where you cannot add the certificate to the trust store.
+## Security Considerations
 
-### Debug Mode
+⚠️ **API Token Security**
 
-You can enable debug logging for troubleshooting:
+- Never commit API tokens to repositories
+- Use environment variables for credentials
+- Rotate your YouTrack API tokens periodically
+- Use tokens with minimum required permissions
 
-```bash
-docker run -i --rm \
-  -e YOUTRACK_URL=https://yourinstance.youtrack.cloud \
-  -e YOUTRACK_API_TOKEN=perm:your-permanent-token \
-  -e MCP_DEBUG=true \
-  youtrack-mcp
-```
+## Requirements
+
+- Docker
+- YouTrack instance (Cloud or self-hosted)
+- YouTrack API token with appropriate permissions

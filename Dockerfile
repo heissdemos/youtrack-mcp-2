@@ -2,20 +2,15 @@ FROM python:3.10-slim
 
 WORKDIR /app
 
-# Install git for dependencies from Git repositories
-RUN apt-get update && apt-get install -y --no-install-recommends git && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
-
 # Copy requirements and install dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt && \
-    python -c "import mcp; print(dir(mcp))"
+    python -c "import fastmcp; print('FastMCP 2.0 installed successfully')"
 
 # Copy application code
 COPY . .
 
-# Default port for REST API
+# Default port for FastMCP server
 EXPOSE 8000
 
 # Default command

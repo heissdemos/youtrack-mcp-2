@@ -8,7 +8,6 @@ __pycache__/
 *$py.class
 *.so
 .Python
-env/
 build/
 develop-eggs/
 dist/
@@ -37,6 +36,7 @@ coverage.xml
 venv/
 ENV/
 env/
+mcp-venv/
 
 # IDE
 .idea/
@@ -44,23 +44,42 @@ env/
 *.swp
 *.swo
 
-# Environment files
+# Environment files - NEVER include real credentials
 .env
 .env.*
-!.env.example
+.env.local
+.env.backup
+docker.env
 
-# Custom configuration
+# MCP Configuration files with sensitive data
+.claude-mcp.json
+.vscode/mcp.json
+.cursor/mcp.json
+
+# Custom configuration with potential credentials
 parent-ticket.json
-parent-ticket.example.json
 
-# Docker
-Dockerfile
-docker-compose.yml
-.dockerignore
+# Docker development files
+docker-compose.override.yml
 
-# Documentation
-*.md
-LICENSE
+# Logs
+*.log
+logs/
 
-# Tests
-tests/ 
+# Development files
+plan.md
+todo.md
+integration_tests/
+
+# Security files
+*.pem
+*.key
+*.token
+tokens/
+auth/
+credentials/
+secrets/
+
+# Screenshots and temp files
+screenshot/
+*.tmp 
