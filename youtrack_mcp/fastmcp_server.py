@@ -257,6 +257,30 @@ def search_users(query: str, limit: int = 10) -> str:
 
 # Work Items Tools
 @mcp.tool()
+def check_time_tracking(issue_id: str) -> str:
+    """
+    Check if time tracking is enabled for a specific issue's project.
+    
+    Args:
+        issue_id: The issue ID or readable ID
+        
+    Returns:
+        JSON string with time tracking availability information
+    """
+    try:
+        is_enabled, message = work_items_api.is_time_tracking_enabled(issue_id)
+        result = {
+            "issue_id": issue_id,
+            "time_tracking_enabled": is_enabled,
+            "message": message
+        }
+        return json.dumps(result, indent=2)
+    except Exception as e:
+        logger.exception(f"Error checking time tracking for issue {issue_id}")
+        return json.dumps({"error": str(e)})
+
+
+@mcp.tool()
 def get_work_items(issue_id: str) -> str:
     """
     Get work items (time tracking entries) for a specific issue.
@@ -273,6 +297,7 @@ def get_work_items(issue_id: str) -> str:
     except Exception as e:
         logger.exception(f"Error getting work items for issue {issue_id}")
         return json.dumps({"error": str(e)})
+
 
 
 @mcp.tool()
@@ -294,6 +319,7 @@ def create_work_item(issue_id: str, duration: str, text: str = "") -> str:
     except Exception as e:
         logger.exception(f"Error creating work item for issue {issue_id}")
         return json.dumps({"error": str(e)})
+
 
 
 @mcp.tool()

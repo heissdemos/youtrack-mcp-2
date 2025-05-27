@@ -73,9 +73,11 @@ todo.md
 integration_tests/
 .python-version
 
-# Docker-related sensitive files
+# Docker-related files
 docker-compose.override.yml
 docker.env
+Dockerfile.dev
+.dockerignore.local
 
 # Custom token and security files
 *.pem

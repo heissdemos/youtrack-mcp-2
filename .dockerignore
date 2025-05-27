@@ -82,4 +82,10 @@ secrets/
 
 # Screenshots and temp files
 screenshot/
-*.tmp 
+*.tmp
+test_*.py
+
+# Documentation (included in image but exclude drafts)
+CLAUDE.md.draft
+README.md.draft
+docs/drafts/ 
